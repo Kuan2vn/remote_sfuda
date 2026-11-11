@@ -2,40 +2,44 @@
 
 Internal copy for the authors. Source-free domain adaptation from ISPRS Vaihingen (IRRG) to Potsdam, SegFormer-B2.
 Method details: [docs/METHODS.md](docs/METHODS.md). Results: [docs/RESULTS.md](docs/RESULTS.md).
+Needs Linux with one NVIDIA GPU and conda.
 
-## 1. Install
+## 1. Setup (once)
 
-```bash
-python -m venv .venv && source .venv/bin/activate
-pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu128
-pip install -r requirements.txt
-```
-
-## 2. Setup data (Hugging Face dataset `kuan2/picst-rs-sfda-data`, ~6.6 GB)
+Data come from the Hugging Face dataset `kuan2/picst-rs-sfda-data`. If it is private, put a read token (ask the owner) in `.env` first: `echo 'HF_TOKEN=hf_xxx' > .env`.
 
 ```bash
-hf auth login                  # paste a Hugging Face token that can read the dataset (ask the owner)
-python download_data.py        # fills ./data
+bash setup.sh        # conda env "picst", requirements, ~6.6 GB data into ./data
 ```
 
-## 3. Run
+## 2. Run
+
+Inside tmux on the GPU node:
+
+```bash
+bash run_all.sh      # runs the pending jobs one after another; re-run to resume; finished jobs are skipped
+```
+
+Default jobs: `s3t_sfda`, `stcgn` on IRRG; `dtst`, `stable_st`, `s3t_sfda`, `stcgn` on RGB. Options:
+
+```bash
+JOBS="picst:irrg dtst:irrg" bash run_all.sh   # custom list (method:setting)
+HOURS=10 bash run_all.sh                      # pause each run at its next evaluation after ~10 h (minimum 0.25); re-run to resume
+```
 
 `--setting` is `irrg` (PD IRRG, main) or `rgb` (PD RGB). Methods: `picst`, `picst_v1`, `picst_c0`, `picst_c1`, `dtst`, `snd`, `stable_st`, `s3t_sfda`, `stcgn`.
+`snd` is IRRG only (its warm stage is IRRG). A single job: `python run.py --method stcgn --setting irrg`
+(St-CGN automatically runs its source warm-up, 2000 updates on source chips, first, then adapts).
+
+## 3. Results to send
 
 ```bash
-python run.py --method picst     --setting irrg   # ours
-python run.py --method dtst      --setting irrg
-python run.py --method snd       --setting irrg
-python run.py --method stable_st --setting irrg
-python run.py --method s3t_sfda  --setting irrg
-python run.py --method stcgn     --setting irrg   # automatically runs the St-CGN source warm-up (2000 updates on source chips) first, then adapts
-python run.py --method picst     --setting rgb
+python collect_results.py     # also run automatically after every job in run_all.sh
 ```
 
-- Outputs: `runs/<setting>/<experiment>/seed1/report/PEAK_AND_ENDPOINT.md`.
-- Re-running the same command resumes from the saved state.
-- `--hours H` pauses safely at the next evaluation after H hours (e.g. before a Kaggle session limit).
-- Evaluate a checkpoint:
+Send `results.zip` (a few KB; no checkpoints). It holds `results/summary.md`, one row per run with status, number of evaluations done, and peak / last mIoU6 (runs still in progress show the curve so far), plus each run's `PEAK_AND_ENDPOINT.md`, `peak_and_endpoint.json` and `RUN_STATE.json` under `results/<setting>/<experiment>/`. Full outputs stay in `runs/<setting>/<experiment>/seed1/`.
+
+Evaluate a checkpoint:
 
 ```bash
 python run.py --method eval --setting irrg --checkpoint <path/to/checkpoint.pth>
