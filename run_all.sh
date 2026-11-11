@@ -10,7 +10,15 @@ root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 jobs=${JOBS:-"s3t_sfda:irrg stcgn:irrg snd:irrg dtst:rgb stable_st:rgb s3t_sfda:rgb stcgn:rgb"}
 hours=${HOURS:-1000000}
 
-[[ -f "$root/.venv/bin/activate" ]] && . "$root/.venv/bin/activate"
+env_name=${CONDA_ENV:-picst}
+if ! command -v conda >/dev/null 2>&1; then
+    for hook in "$HOME/miniconda3/etc/profile.d/conda.sh" "$HOME/anaconda3/etc/profile.d/conda.sh" /opt/conda/etc/profile.d/conda.sh; do
+        if [[ -f "$hook" ]]; then . "$hook"; break; fi
+    done
+fi
+command -v conda >/dev/null 2>&1 || { echo 'conda not found (load the conda module first)' >&2; exit 1; }
+eval "$(conda shell.bash hook)"
+set +u; conda activate "$env_name" || { echo "conda env '$env_name' not found; run bash setup.sh first" >&2; exit 1; }
 cd "$root"
 
 # experiment folder that run.py writes for a job (taken from METHODS in run.py)
