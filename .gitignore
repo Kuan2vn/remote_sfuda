@@ -8,3 +8,5 @@ __pycache__/
 results/
 results.zip
 .env
+.setup_done
+.setup_failed
