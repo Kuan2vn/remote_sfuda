@@ -2,7 +2,7 @@
 
 Internal copy for the authors. Source-free domain adaptation from ISPRS Vaihingen (IRRG) to Potsdam, SegFormer-B2.
 Method details: [docs/METHODS.md](docs/METHODS.md). Results: [docs/RESULTS.md](docs/RESULTS.md).
-Needs Linux with one NVIDIA GPU and conda (on HPC, load the conda/anaconda module first if `conda` is not on PATH).
+Needs Linux with one NVIDIA GPU and conda (Miniforge, Miniconda or Anaconda in the home folder, or a loaded conda module).
 
 ## 1. Setup (once)
 
@@ -12,11 +12,15 @@ Downloads the Hugging Face dataset `kuan2/picst-rs-sfda-data`. No token is neede
 bash setup.sh        # conda env "picst" (Python 3.11), requirements, ~6.6 GB data into ./data
 ```
 
+On Pascal GPUs (e.g. P100) use `TORCH_CUDA=cu126 bash setup.sh`: the default torch build (CUDA 12.8) does not support them.
+
 If the Hugging Face download is blocked by a firewall, copy the dataset files to the machine some other way, then run `python download_data.py --from-dir <folder>` (checksums are still verified).
 
 ## 2. Run
 
-Inside tmux on the GPU node:
+**SLURM cluster (ALICE3):** edit `--account` and `--mail-user` in `run_alice.sbatch`, then `sbatch run_alice.sbatch`. It runs the 7 default jobs in parallel as a job array (one P100 each); details are in the file header.
+
+**One GPU machine:** inside tmux on the GPU node:
 
 ```bash
 bash run_all.sh      # runs the pending jobs one after another; re-run to resume; finished jobs are skipped

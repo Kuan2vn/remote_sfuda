@@ -8,7 +8,7 @@ py_version=3.11    # new env; torch 2.8.0 has wheels only for Python <= 3.13 (an
 
 if [[ -f "$root/.env" ]]; then set -a; . "$root/.env"; set +a; fi
 if ! command -v conda >/dev/null 2>&1; then
-    for hook in "$HOME/miniconda3/etc/profile.d/conda.sh" "$HOME/anaconda3/etc/profile.d/conda.sh" /opt/conda/etc/profile.d/conda.sh; do
+    for hook in "$HOME/miniforge3/etc/profile.d/conda.sh" "$HOME/miniconda3/etc/profile.d/conda.sh" "$HOME/anaconda3/etc/profile.d/conda.sh" /opt/conda/etc/profile.d/conda.sh; do
         if [[ -f "$hook" ]]; then . "$hook"; break; fi
     done
 fi
@@ -22,11 +22,15 @@ python -c "import sys; sys.exit(not (3, 10) <= sys.version_info[:2] <= (3, 13))"
     echo "conda env '$env_name' has $(python -V); remove it (conda env remove -n $env_name) or set CONDA_ENV=other_name" >&2; exit 1; }
 
 python -m pip install --upgrade pip
-# torch 2.8.0 on PyPI (Linux) is the CUDA 12.8 build, same as the cu128 index; PyPI also works behind TLS-inspecting firewalls.
-# To use the PyTorch index instead: TORCH_INDEX=https://download.pytorch.org/whl/cu128 bash setup.sh
-# 2.8.0 is the version all reported results used. Another version (untested; newer wheels may need a newer NVIDIA driver):
-#   TORCH_PKGS="torch torchvision" bash setup.sh
-python -m pip install ${TORCH_PKGS:-torch==2.8.0 torchvision==0.23.0} ${TORCH_INDEX:+--index-url "$TORCH_INDEX"}
+# torch 2.8.0 on PyPI (Linux) is the CUDA 12.8 build; PyPI also works behind TLS-inspecting firewalls.
+# The CUDA 12.8 build does not support Pascal GPUs (e.g. P100). For them use the CUDA 12.6 build (also fine on newer GPUs):
+#   TORCH_CUDA=cu126 bash setup.sh
+# 2.8.0 is the version all reported results used; another version (untested): TORCH_PKGS="torch torchvision" bash setup.sh
+if [[ -n "${TORCH_CUDA:-}" ]]; then
+    python -m pip install "torch==2.8.0+$TORCH_CUDA" "torchvision==0.23.0+$TORCH_CUDA" --index-url "https://download.pytorch.org/whl/$TORCH_CUDA"
+else
+    python -m pip install ${TORCH_PKGS:-torch==2.8.0 torchvision==0.23.0}
+fi
 python -c 'import torch; torch.cuda.is_available() or print("Note: torch sees no GPU here (normal on a login node; run_all.sh must run on a GPU node)")'
 python -c 'import torch; print("torch", torch.__version__, "CUDA", torch.version.cuda)'
 python -m pip install -r "$root/requirements.txt"
