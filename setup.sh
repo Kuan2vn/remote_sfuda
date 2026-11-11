@@ -1,20 +1,14 @@
 #!/usr/bin/env bash
-# One-time setup: conda env "picst" + requirements + data bundle.  Run: bash setup.sh
-# Needs read access to the private HF dataset: put HF_TOKEN=hf_xxx in ./.env, or run `hf auth login` first.
+# One-time setup: python venv ./.venv + requirements + data bundle.  Run: bash setup.sh
+# The HF dataset is public; an optional HF_TOKEN=... in ./.env is picked up if present.
 set -euo pipefail
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
-env_name=${CONDA_ENV:-picst}
+PYTHON=${PYTHON:-python3}    # needs Python >= 3.10; on HPC e.g. `module load python` first, or PYTHON=python3.11 bash setup.sh
 
 if [[ -f "$root/.env" ]]; then set -a; . "$root/.env"; set +a; fi
-if ! command -v conda >/dev/null 2>&1; then
-    for hook in "$HOME/miniconda3/etc/profile.d/conda.sh" "$HOME/anaconda3/etc/profile.d/conda.sh" /opt/conda/etc/profile.d/conda.sh; do
-        if [[ -f "$hook" ]]; then . "$hook"; break; fi
-    done
-fi
-command -v conda >/dev/null 2>&1 || { echo 'conda not found' >&2; exit 1; }
-eval "$(conda shell.bash hook)"
-conda env list | awk '{print $1}' | grep -qx "$env_name" || conda create -y -n "$env_name" -c conda-forge --override-channels python=3.10
-conda activate "$env_name"
+"$PYTHON" -c 'import sys; sys.exit(sys.version_info < (3, 10))' || { echo "Need Python >= 3.10 (got $("$PYTHON" -V)); set PYTHON=python3.x" >&2; exit 1; }
+[[ -d "$root/.venv" ]] || "$PYTHON" -m venv "$root/.venv"
+. "$root/.venv/bin/activate"
 
 python -m pip install --upgrade pip
 python -m pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu128

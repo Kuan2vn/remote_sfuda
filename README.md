@@ -2,14 +2,14 @@
 
 Internal copy for the authors. Source-free domain adaptation from ISPRS Vaihingen (IRRG) to Potsdam, SegFormer-B2.
 Method details: [docs/METHODS.md](docs/METHODS.md). Results: [docs/RESULTS.md](docs/RESULTS.md).
-Needs Linux with one NVIDIA GPU and conda.
+Needs Linux with one NVIDIA GPU and Python ≥ 3.10 (on HPC: `module load python` first, or `PYTHON=python3.11 bash setup.sh`).
 
 ## 1. Setup (once)
 
-Data come from the Hugging Face dataset `kuan2/picst-rs-sfda-data`. If it is private, put a read token (ask the owner) in `.env` first: `echo 'HF_TOKEN=hf_xxx' > .env`.
+Downloads the Hugging Face dataset `kuan2/picst-rs-sfda-data`. No token is needed while it is public; otherwise put a read token (ask the owner) in `.env`: `echo 'HF_TOKEN=hf_xxx' > .env`.
 
 ```bash
-bash setup.sh        # conda env "picst", requirements, ~6.6 GB data into ./data
+bash setup.sh        # venv ./.venv, requirements, ~6.6 GB data into ./data
 ```
 
 ## 2. Run
