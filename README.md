@@ -12,6 +12,8 @@ Downloads the Hugging Face dataset `kuan2/picst-rs-sfda-data`. No token is neede
 bash setup.sh        # venv ./.venv, requirements, ~6.6 GB data into ./data
 ```
 
+If the Hugging Face download is blocked by a firewall, copy the dataset files to the machine some other way, then run `python download_data.py --from-dir <folder>` (checksums are still verified).
+
 ## 2. Run
 
 Inside tmux on the GPU node:
@@ -20,7 +22,7 @@ Inside tmux on the GPU node:
 bash run_all.sh      # runs the pending jobs one after another; re-run to resume; finished jobs are skipped
 ```
 
-Default jobs: `s3t_sfda`, `stcgn` on IRRG; `dtst`, `stable_st`, `s3t_sfda`, `stcgn` on RGB. Options:
+Default jobs: `s3t_sfda`, `stcgn`, `snd` on IRRG; `dtst`, `stable_st`, `s3t_sfda`, `stcgn` on RGB. Options:
 
 ```bash
 JOBS="picst:irrg dtst:irrg" bash run_all.sh   # custom list (method:setting)

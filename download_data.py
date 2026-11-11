@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Download the public data bundle from Hugging Face and unpack it into ./data (HF_TOKEN is used if set)."""
+"""Download the public data bundle from Hugging Face and unpack it into ./data (HF_TOKEN is used if set).
+
+Backup when Hugging Face downloads are blocked (e.g. a firewall): copy the dataset files into one folder by any other
+route, then `python download_data.py --from-dir that/folder`. Files found there are used instead of downloading;
+every file is still checked against SHA256SUMS.json."""
 import argparse
 import hashlib
 import json
@@ -23,13 +27,18 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--data-dir', type=Path, default=Path(__file__).resolve().parent/'data')
     ap.add_argument('--only', nargs='*', help='subset of files from SHA256SUMS.json (default: all)')
+    ap.add_argument('--from-dir', type=Path, help='folder with already-copied dataset files (used before Hugging Face)')
     a = ap.parse_args()
     a.data_dir.mkdir(parents=True, exist_ok=True)
-    sums = json.loads(Path(hf_hub_download(REPO, 'SHA256SUMS.json', repo_type='dataset')).read_text())
+    def fetch(name):
+        if a.from_dir and (a.from_dir/name).is_file():
+            return a.from_dir/name
+        return Path(hf_hub_download(REPO, name, repo_type='dataset'))
+    sums = json.loads(fetch('SHA256SUMS.json').read_text())
     for name, info in sums.items():
         if a.only and name not in a.only:
             continue
-        path = Path(hf_hub_download(REPO, name, repo_type='dataset'))
+        path = fetch(name)
         if sha256(path) != info['sha256']:
             raise RuntimeError(f'Checksum mismatch for {name}')
         if name.endswith('.zip'):

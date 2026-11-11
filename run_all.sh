@@ -7,7 +7,7 @@
 # Run it inside tmux on the GPU node. After every job it refreshes results/ and results.zip (send results.zip).
 set -uo pipefail
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
-jobs=${JOBS:-"s3t_sfda:irrg stcgn:irrg dtst:rgb stable_st:rgb s3t_sfda:rgb stcgn:rgb"}
+jobs=${JOBS:-"s3t_sfda:irrg stcgn:irrg snd:irrg dtst:rgb stable_st:rgb s3t_sfda:rgb stcgn:rgb"}
 hours=${HOURS:-1000000}
 
 [[ -f "$root/.venv/bin/activate" ]] && . "$root/.venv/bin/activate"

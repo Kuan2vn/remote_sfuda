@@ -11,7 +11,10 @@ if [[ -f "$root/.env" ]]; then set -a; . "$root/.env"; set +a; fi
 . "$root/.venv/bin/activate"
 
 python -m pip install --upgrade pip
-python -m pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu128
+# torch 2.8.0 on PyPI (Linux) is the CUDA 12.8 build, same as the cu128 index; PyPI also works behind TLS-inspecting firewalls.
+# To use the PyTorch index instead: TORCH_INDEX=https://download.pytorch.org/whl/cu128 bash setup.sh
+python -m pip install torch==2.8.0 torchvision==0.23.0 ${TORCH_INDEX:+--index-url "$TORCH_INDEX"}
+python -c 'import torch; print("torch", torch.__version__, "CUDA", torch.version.cuda)'
 python -m pip install -r "$root/requirements.txt"
 
 cd "$root"
