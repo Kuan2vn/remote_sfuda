@@ -3,7 +3,7 @@
 Internal copy for the authors. Source-free domain adaptation from ISPRS Vaihingen (IRRG) to Potsdam, SegFormer-B2.
 Method details: [docs/METHODS.md](docs/METHODS.md). Results: [docs/RESULTS.md](docs/RESULTS.md).
 
-## 1. Install (Linux, one NVIDIA GPU with ≥ 14 GB free; a 16 GB T4 works)
+## 1. Install
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -11,7 +11,7 @@ pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorc
 pip install -r requirements.txt
 ```
 
-## 2. Setup data (private Hugging Face dataset `kuan2/picst-rs-sfda-data`, ~6.6 GB)
+## 2. Setup data (Hugging Face dataset `kuan2/picst-rs-sfda-data`, ~6.6 GB)
 
 ```bash
 hf auth login                  # paste a Hugging Face token that can read the dataset (ask the owner)
