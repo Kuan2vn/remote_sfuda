@@ -18,7 +18,7 @@ If the Hugging Face download is blocked by a firewall, copy the dataset files to
 
 ## 2. Run
 
-**SLURM cluster (ALICE3), no separate setup needed:** edit `--account` and `--mail-user` in `run_alice.sbatch`, then `sbatch run_alice.sbatch`. Task 0 runs the one-time setup (with the Pascal torch build), then the 7 default jobs run in parallel as a job array (one P100 each); details are in the file header.
+**SLURM cluster (ALICE3), no separate setup needed:** edit `--account` and `--mail-user` in `run_alice.sbatch`, then `sbatch run_alice.sbatch`. It does the one-time setup (with the Pascal torch build), then runs the default jobs one after another on one P100; details are in the file header.
 
 **One GPU machine:** inside tmux on the GPU node:
 

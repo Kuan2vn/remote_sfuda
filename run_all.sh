@@ -4,7 +4,7 @@
 #   JOBS="picst:irrg dtst:rgb" bash run_all.sh    # custom list (method:setting)
 #   HOURS=10 bash run_all.sh                      # pause each run safely after ~10 h; re-run to resume
 # HOURS limits the adaptation stage only (min 0.25); the St-CGN warm-up is not time-limited.
-# On a SLURM cluster use run_alice.sbatch instead (one GPU per job, all jobs in parallel).
+# On ALICE3 (SLURM) submit run_alice.sbatch, which calls this script.
 # Run it inside tmux on the GPU node. After every job it refreshes results/ and results.zip (send results.zip).
 set -uo pipefail
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
