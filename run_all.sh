@@ -6,7 +6,7 @@
 # HOURS limits the adaptation stage only (min 0.25); the St-CGN warm-up is not time-limited.
 # On ALICE3 (SLURM) submit run_alice.sbatch, which calls this script.
 # Run it inside tmux on the GPU node. After every job it refreshes results/ and results.zip (send results.zip).
-set -uo pipefail
+set -o pipefail    # no -u: conda's (de)activate hooks read unset variables
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 jobs=${JOBS:-"s3t_sfda:irrg stcgn:irrg snd:irrg dtst:rgb stable_st:rgb s3t_sfda:rgb stcgn:rgb"}
 hours=${HOURS:-1000000}
@@ -19,7 +19,7 @@ if ! command -v conda >/dev/null 2>&1; then
 fi
 command -v conda >/dev/null 2>&1 || { echo 'conda not found (load the conda module first)' >&2; exit 1; }
 eval "$(conda shell.bash hook)"
-set +u; conda activate "$env_name" || { echo "conda env '$env_name' not found; run bash setup.sh first" >&2; exit 1; }
+conda activate "$env_name" || { echo "conda env '$env_name' not found; run bash setup.sh first" >&2; exit 1; }
 cd "$root"
 
 # fail fast if this torch build cannot run on this GPU (e.g. the default CUDA 12.8 build on a Pascal P100)

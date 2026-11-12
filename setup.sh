@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One-time setup: conda env "picst" (Python 3.11) + requirements + data bundle.  Run: bash setup.sh
 # The HF dataset is public; an optional HF_TOKEN=... in ./.env is picked up if present.
-set -euo pipefail
+set -eo pipefail   # no -u: conda's (de)activate hooks read unset variables
 root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 env_name=${CONDA_ENV:-picst}
 py_version=3.11    # new env; torch 2.8.0 has wheels only for Python <= 3.13 (an existing env with 3.10-3.13 is accepted)
@@ -17,7 +17,7 @@ eval "$(conda shell.bash hook)"
 if ! conda env list | awk '{print $1}' | grep -qx "$env_name"; then
     conda create -y -n "$env_name" -c conda-forge --override-channels "python=$py_version"
 fi
-set +u; conda activate "$env_name"; set -u    # some conda activate hooks read unset variables
+conda activate "$env_name"
 python -c "import sys; sys.exit(not (3, 10) <= sys.version_info[:2] <= (3, 13))" || {
     echo "conda env '$env_name' has $(python -V); remove it (conda env remove -n $env_name) or set CONDA_ENV=other_name" >&2; exit 1; }
 
